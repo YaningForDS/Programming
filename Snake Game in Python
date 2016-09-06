@@ -1,0 +1,100 @@
+from tkinter import *
+import random
+class SnakeGUI():
+    def __init__(self):
+        self.win = Tk()
+        self.win.title("SnakeGUI")
+        self.x = 300
+        self.y = 300
+        self.direction=(0,20)
+        self.delay = 200
+        self.canvas = Canvas(self.win,width = 600, height = 600,bg = "black")
+        self.canvas.pack()
+        self.snake = [[self.canvas.create_rectangle(self.x-20,self.y-20,self.x,self.y,fill="white",tag = "initialsnake"),self.x,self.y]]
+        self.button = Button(self.win,text = "Start", command = self.start)
+        self.button.pack()
+        self.button2 = Button(self.win,text = "Restart", command = self.restart)
+        self.button2.pack()
+        self.win.bind("<KeyPress>",self.keypress)
+        #self.score = 0
+        #self.printscore()
+        self.ornot = False
+        self.gameover = False
+        self.drawsnake()
+        self.drawfood()
+        self.win.mainloop()
+    def start(self):
+        if self.gameover == False:
+            if self.button["text"] == "Start":
+                self.button["text"] = "Pause"
+                self.ornot = True
+                self.drawsnake()
+            elif self.button["text"] == "Pause":
+                self.button["text"] = "Start"
+                self.ornot = False
+    def restart(self):
+        if self.gameover == True:
+            self.gameover = False
+            self.win.destroy()
+            SnakeGUI()
+    def keypress(self,a):
+        if (a.keysym == "Up" or a.keysym == "w" or a.keysym == "W") and self.direction != (0,20):
+            self.direction=(0,-20)
+        if (a.keysym == "Down" or a.keysym == "s" or a.keysym == "S") and self.direction != (0,-20):
+            self.direction=(0,20)
+        if (a.keysym == "Right" or a.keysym == "d" or a.keysym == "D") and self.direction != (-20,0):
+            self.direction=(20,0)
+        if (a.keysym == "Left" or a.keysym == "a" or a.keysym == "A") and self.direction != (20,0):
+            self.direction=(-20,0)
+    
+    def drawsnake(self):
+        if self.ornot == True and self.gameover == False:
+            self.x += self.direction[0]
+            self.y += self.direction[1]
+ 
+            if (self.xfood,self.yfood) == (self.x,self.y) and (self.xfood-20,self.yfood-20) == (self.x-20,self.y-20):
+                if self.delay > 75:
+                    self.delay -= 4
+                self.canvas.delete('fruit')
+                newx = random.randint(1,30)*20
+                newy = random.randint(1,30)*20
+                self.xfood = newx
+                self.yfood = newy
+                self.food = self.canvas.create_oval(self.xfood-20,self.yfood-20,self.xfood,self.yfood,fill = "pink",tag = 'fruit')
+                
+            else:
+                self.canvas.delete(self.snake[-1][0])
+                del self.snake[-1]
+            self.canvas.after(self.delay,self.drawsnake)
+            self.rectangle = self.canvas.create_rectangle(self.x-20,self.y-20,self.x,self.y,fill="white",tag = "snakehead")
+            self.snake.insert(0,[self.rectangle,self.x,self.y])
+            if self.x > 600 or self.y > 600 or self.x < 20 or self.y < 20:
+                self.gameover = True
+                self.ornot = False
+                self.printscore()
+            for i in self.snake:
+                for j in self.snake:
+                    idx1, x1, y1 = i
+                    idx2, x2, y2 = j
+                    if idx1 != idx2 and x1 == x2 and y1 == y2:
+                        self.gameover = True
+                        self.printscore()
+                        return
+    def drawfood(self):
+        x1 = random.randint(1,30)
+        x = x1*20
+        y1 = random.randint(1,30)
+        y = y1*20
+        self.xfood = x
+        self.yfood = y
+        self.food = self.canvas.create_oval(self.xfood-20,self.yfood-20,self.xfood,self.yfood,fill = "pink",tag = 'fruit')
+    def printscore(self):
+        gameover = Label(self.win,text = "Game Over")
+        gameover.pack()
+        self.score = int(len(self.snake))
+        scorelabel = Label(self.win,text = self.score)
+        scorelabel.pack()
+            
+        
+
+
